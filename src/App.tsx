@@ -162,7 +162,7 @@ export const App: React.FC = () => {
                       No posts yet
                     </div>
                   )}
-                /* eslint-enable */
+                {/* eslint-enable */}
                 {loadingPosts && <Loader />}
                 {!loadingPosts && !postError && posts.length > 0 && (
                   <PostsList
