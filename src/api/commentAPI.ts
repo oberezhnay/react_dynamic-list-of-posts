@@ -11,7 +11,7 @@ export const addComment = ({
   email,
   body,
 }: Omit<Comment, 'id'>) => {
-  return client.post<Comment[]>('/comments', { postId, name, email, body });
+  return client.post<Comment>('/comments', { postId, name, email, body });
 };
 
 export const deleteComment = (commentId: number) => {

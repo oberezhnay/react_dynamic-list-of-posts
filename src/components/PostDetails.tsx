@@ -2,11 +2,12 @@ import { Loader } from './Loader';
 import { NewCommentForm } from './NewCommentForm';
 import { Post } from '../types/Post';
 import { Comment } from '../types/Comment';
+import PropTypes from 'prop-types';
 
 type Props = {
   comments: Comment[];
   openedPost: Post;
-  loading: boolean;
+  isLoading: boolean;
   errorMessage: string | null;
   openForm: boolean;
   setOpenForm: (value: boolean) => void;
@@ -16,26 +17,26 @@ type Props = {
     email: string,
     body: string,
   ) => void;
-  deleteTodoHandler: (id: number) => void;
+  deleteCommentHandler: (id: number) => void;
 };
 
 export const PostDetails: React.FC<Props> = ({
   comments,
   openedPost,
-  loading,
+  isLoading,
   errorMessage,
   openForm,
   setOpenForm,
   addCommentHandler,
-  deleteTodoHandler,
+  deleteCommentHandler,
 }) => {
-  const deleteBtnHandler = async (id: number) => {
-    deleteTodoHandler(id);
+  const handleDeleteBtnClick = async (id: number) => {
+    deleteCommentHandler(id);
   };
 
   return (
     <div className="content" data-cy="PostDetails">
-      <div className="content" data-cy="PostDetails">
+      <div className="content">
         <div className="block">
           <h2 data-cy="PostTitle">
             {`#${openedPost.id}: ${openedPost.title}`}
@@ -45,7 +46,7 @@ export const PostDetails: React.FC<Props> = ({
         </div>
 
         <div className="block">
-          {loading && <Loader />}
+          {isLoading && <Loader />}
 
           {errorMessage && (
             <div className="notification is-danger" data-cy="CommentsError">
@@ -53,12 +54,12 @@ export const PostDetails: React.FC<Props> = ({
             </div>
           )}
 
-          {!loading && !errorMessage && comments.length === 0 && (
+          {!isLoading && !errorMessage && comments.length === 0 && (
             <p className="title is-4" data-cy="NoCommentsMessage">
               No comments yet
             </p>
           )}
-          {!loading && !errorMessage && comments.length > 0 && (
+          {!isLoading && !errorMessage && comments.length > 0 && (
             <>
               <p className="title is-4">Comments:</p>
 
@@ -77,7 +78,7 @@ export const PostDetails: React.FC<Props> = ({
                       type="button"
                       className="delete is-small"
                       aria-label="delete"
-                      onClick={() => deleteBtnHandler(comment.id)}
+                      onClick={() => handleDeleteBtnClick(comment.id)}
                     >
                       delete button
                     </button>
@@ -91,7 +92,7 @@ export const PostDetails: React.FC<Props> = ({
             </>
           )}
 
-          {!openForm && !loading && !errorMessage && (
+          {!openForm && !isLoading && !errorMessage && (
             <button
               data-cy="WriteCommentButton"
               type="button"
@@ -106,11 +107,35 @@ export const PostDetails: React.FC<Props> = ({
         {openForm && (
           <NewCommentForm
             openedPost={openedPost}
-            loading={loading}
+            isLoading={isLoading}
             addCommentHandler={addCommentHandler}
           />
         )}
       </div>
     </div>
   );
+};
+
+PostDetails.propTypes = {
+  comments: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      postId: PropTypes.number.isRequired,
+      name: PropTypes.string.isRequired,
+      email: PropTypes.string.isRequired,
+      body: PropTypes.string.isRequired,
+    }),
+  ).isRequired as React.Validator<Comment[]>,
+  openedPost: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    userId: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+  }).isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  errorMessage:  PropTypes.string,
+  openForm: PropTypes.bool.isRequired,
+  setOpenForm: PropTypes.func.isRequired,
+  addCommentHandler: PropTypes.func.isRequired,
+  deleteCommentHandler: PropTypes.func.isRequired,
 };

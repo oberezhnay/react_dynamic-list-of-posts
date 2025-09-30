@@ -1,5 +1,6 @@
 import { Post } from '../types/Post';
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
 
 type Props = {
   posts: Post[];
@@ -14,7 +15,7 @@ export const PostsList: React.FC<Props> = ({
   setOpenedPost,
   setOpenForm,
 }) => {
-  const btnClickHandler = (post: Post) => {
+  const handlePostBtnClick = (post: Post) => {
     setOpenForm(false);
     if (openedPost && openedPost.id === post.id) {
       setOpenedPost(null);
@@ -51,7 +52,7 @@ export const PostsList: React.FC<Props> = ({
                   className={classNames('button is-link', {
                     'is-light': !openedPost || post.id !== openedPost.id,
                   })}
-                  onClick={() => btnClickHandler(post)}
+                  onClick={() => handlePostBtnClick(post)}
                 >
                   {openedPost && post.id === openedPost.id ? 'Close' : 'Open'}
                 </button>
@@ -62,4 +63,18 @@ export const PostsList: React.FC<Props> = ({
       </table>
     </div>
   );
+};
+
+const postShape = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  userId: PropTypes.number.isRequired,
+  title: PropTypes.string.isRequired,
+  body: PropTypes.string.isRequired,
+});
+
+PostsList.propTypes = {
+  posts: PropTypes.arrayOf(postShape).isRequired as React.Validator<Post[]>,
+  openedPost: postShape as React.Validator<Post | null>,
+  setOpenedPost: PropTypes.func.isRequired,
+  setOpenForm: PropTypes.func.isRequired,
 };

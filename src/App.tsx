@@ -18,15 +18,15 @@ import { Comment } from './types/Comment';
 
 export const App: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
 
   const [posts, setPosts] = useState<Post[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
 
   const [comments, setComments] = useState<Comment[]>([]);
-  const [loadingComments, setLoadingComments] = useState(false);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [commentsError, setCommentsError] = useState<string | null>(null);
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -34,17 +34,17 @@ export const App: React.FC = () => {
   const [openForm, setOpenForm] = useState(false);
 
   useEffect(() => {
-    setLoadingUsers(true);
+    setIsLoadingUsers(true);
     setUserError(null);
 
     getUsers()
       .then(setUsers)
       .catch(() => setUserError('Something went wrong with loading users'))
-      .finally(() => setLoadingUsers(false));
+      .finally(() => setIsLoadingUsers(false));
   }, []);
 
   const loadPostsHandler = async (userId: number) => {
-    setLoadingPosts(true);
+    setIsLoadingPosts(true);
     setPostError(null);
     setSelectedPost(null);
 
@@ -55,12 +55,12 @@ export const App: React.FC = () => {
     } catch {
       setPostError('Something went wrong with loading posts!');
     } finally {
-      setLoadingPosts(false);
+      setIsLoadingPosts(false);
     }
   };
 
   const loadCommentsHandler = async (postId: number) => {
-    setLoadingComments(true);
+    setIsLoadingComments(true);
     setCommentsError(null);
     try {
       const response = await getComments(postId);
@@ -69,14 +69,16 @@ export const App: React.FC = () => {
     } catch {
       setCommentsError('Something went wrong with loading comments!');
     } finally {
-      setLoadingComments(false);
+      setIsLoadingComments(false);
     }
   };
 
   useEffect(() => {
+    setOpenForm(false);
     if (selectedPost === null) {
-      setPosts([]);
-      setLoadingPosts(false);
+      // ???
+      // setPosts([]);
+      setIsLoadingPosts(false);
       setPostError(null);
 
       return;
@@ -92,7 +94,7 @@ export const App: React.FC = () => {
     body: string,
   ) => {
     setCommentsError(null);
-    setLoadingComments(true);
+    setIsLoadingComments(true);
     try {
       const newComment = await addComment({ postId, name, email, body });
 
@@ -100,22 +102,27 @@ export const App: React.FC = () => {
     } catch {
       setCommentsError('Something went wrong!');
     } finally {
-      setLoadingComments(false);
+      setIsLoadingComments(false);
     }
   };
 
-  const deleteTodoHandler = async (id: number) => {
-    setLoadingComments(true);
+  const deleteCommentHandler = async (id: number) => {
+    const prevComments = [...comments];
+    setIsLoadingComments(true);
     setCommentsError(null);
+    setComments(currentComments =>
+        currentComments.filter(comment => comment.id !== id),
+      );
     try {
       await deleteComment(id);
       setComments(currentComments =>
         currentComments.filter(comment => comment.id !== id),
       );
     } catch {
+      setComments(prevComments);
       setCommentsError('Something went wrong!');
     } finally {
-      setLoadingComments(false);
+      setIsLoadingComments(false);
     }
   };
 
@@ -131,7 +138,7 @@ export const App: React.FC = () => {
                   loadPosts={loadPostsHandler}
                   selectedUser={selectedUser}
                   setSelectedUser={setSelectedUser}
-                  loading={loadingUsers}
+                  loading={isLoadingUsers}
                   error={userError}
                 />
               </div>
@@ -140,8 +147,8 @@ export const App: React.FC = () => {
                 {!selectedUser && (
                   <p data-cy="NoSelectedUser">No user selected</p>
                 )}
-                {loadingUsers && <Loader />}
-                {!loadingPosts && postError && (
+                {isLoadingUsers && <Loader />}
+                {!isLoadingPosts && postError && (
                   <div
                     className="notification is-danger"
                     data-cy="PostsLoadingError"
@@ -149,8 +156,8 @@ export const App: React.FC = () => {
                     Something went wrong!
                   </div>
                 )}
-                {!loadingPosts &&
-                  !loadingUsers &&
+                {!isLoadingPosts &&
+                  !isLoadingUsers &&
                   !postError &&
                   selectedUser &&
                   posts.length === 0 && (
@@ -163,8 +170,8 @@ export const App: React.FC = () => {
                     </div>
                   )}
                 {/* eslint-enable */}
-                {loadingPosts && <Loader />}
-                {!loadingPosts && !postError && posts.length > 0 && (
+                {isLoadingPosts && <Loader />}
+                {!isLoadingPosts && !postError && posts.length > 0 && (
                   <PostsList
                     posts={posts}
                     openedPost={selectedPost}
@@ -191,12 +198,12 @@ export const App: React.FC = () => {
                 <PostDetails
                   comments={comments}
                   openedPost={selectedPost}
-                  loading={loadingComments}
+                  isLoading={isLoadingComments}
                   errorMessage={commentsError}
                   openForm={openForm}
                   setOpenForm={setOpenForm}
                   addCommentHandler={addCommentHandler}
-                  deleteTodoHandler={deleteTodoHandler}
+                  deleteCommentHandler={deleteCommentHandler}
                 />
               )}
             </div>

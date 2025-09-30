@@ -1,10 +1,11 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Post } from '../types/Post';
 
 type Props = {
   openedPost: Post;
-  loading: boolean;
+  isLoading: boolean;
   addCommentHandler: (
     postId: number,
     name: string,
@@ -15,7 +16,7 @@ type Props = {
 
 export const NewCommentForm: React.FC<Props> = ({
   openedPost,
-  loading,
+  isLoading,
   addCommentHandler,
 }) => {
   const [name, setName] = useState('');
@@ -54,11 +55,12 @@ export const NewCommentForm: React.FC<Props> = ({
     }
 
     if (normalizedName && normalizedEmail && normalizedComment) {
+      setCommentError(false);
       try {
-        await addCommentHandler(openedPost.id, name, email, commentText);
-      } catch {
-      } finally {
+        await addCommentHandler(openedPost.id, normalizedName, normalizedEmail, normalizedComment);
         setCommentText('');
+      } catch {
+        setCommentError(true);
       }
     }
   };
@@ -78,7 +80,12 @@ export const NewCommentForm: React.FC<Props> = ({
             placeholder="Name Surname"
             className={classNames('input', { 'is-danger': nameError })}
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={e => {
+              setName(e.target.value);
+              if (nameError) {
+                setNameError(false);
+              }
+            }}
           />
 
           <span className="icon is-small is-left">
@@ -115,7 +122,12 @@ export const NewCommentForm: React.FC<Props> = ({
             placeholder="email@test.com"
             className={classNames('input', { 'is-danger': emailError })}
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => {
+              setEmail(e.target.value)
+              if (emailError) {
+                setEmailError(false);
+              }
+            }}
           />
 
           <span className="icon is-small is-left">
@@ -151,7 +163,12 @@ export const NewCommentForm: React.FC<Props> = ({
             placeholder="Type comment here"
             className={classNames('textarea', { 'is-danger': commentError })}
             value={commentText}
-            onChange={e => setCommentText(e.target.value)}
+            onChange={e => {
+              setCommentText(e.target.value);
+              if (commentError) {
+                setCommentError(false);
+              }
+            }}
           />
         </div>
 
@@ -166,7 +183,7 @@ export const NewCommentForm: React.FC<Props> = ({
         <div className="control">
           <button
             type="submit"
-            className={classNames('button is-link', { 'is-loading': loading })}
+            className={classNames('button is-link', { 'is-loading': isLoading })}
           >
             Add
           </button>
@@ -185,4 +202,15 @@ export const NewCommentForm: React.FC<Props> = ({
       </div>
     </form>
   );
+};
+
+NewCommentForm.propTypes = {
+  openedPost: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    userId: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+  }).isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  addCommentHandler: PropTypes.func.isRequired,
 };

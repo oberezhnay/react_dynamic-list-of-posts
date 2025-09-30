@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { User } from '../types/User';
+import PropTypes from 'prop-types'
 import classNames from 'classnames';
 
 type Props = {
@@ -10,6 +11,23 @@ type Props = {
   loading?: boolean;
   error?: string | null;
 };
+
+function useOnClickOutside<T extends HTMLElement>(
+  ref: React.RefObject<T>,
+  handler: () => void,
+) {
+  useEffect(() => {
+    const listener = (event: MouseEvent) => {
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return;
+      }
+      handler();
+    };
+
+    window.addEventListener('click', listener);
+    return () => window.removeEventListener('click', listener);
+  }, [ref, handler]);
+}
 
 export const UserSelector: React.FC<Props> = ({
   users,
@@ -29,21 +47,7 @@ export const UserSelector: React.FC<Props> = ({
     loadPosts(user.id);
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const outsideClickHandler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', outsideClickHandler);
-
-    return () => document.removeEventListener('mousedown', outsideClickHandler);
-  }, [isOpen]);
+  useOnClickOutside(ref, () => setIsOpen(false));
 
   return (
     <div
@@ -93,4 +97,20 @@ export const UserSelector: React.FC<Props> = ({
       </div>
     </div>
   );
+};
+
+const userShape = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
+  username: PropTypes.string,
+  email: PropTypes.string,
+});
+
+UserSelector.propTypes = {
+  users: PropTypes.arrayOf(userShape).isRequired as React.Validator<User[]>,
+  loadPosts: PropTypes.func.isRequired,
+  selectedUser: userShape as React.Validator<User | null>,
+  setSelectedUser: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+  error: PropTypes.string,
 };
