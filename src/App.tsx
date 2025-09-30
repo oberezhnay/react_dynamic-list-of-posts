@@ -108,16 +108,14 @@ export const App: React.FC = () => {
 
   const deleteCommentHandler = async (id: number) => {
     const prevComments = [...comments];
+
     setIsLoadingComments(true);
     setCommentsError(null);
     setComments(currentComments =>
-        currentComments.filter(comment => comment.id !== id),
-      );
+      currentComments.filter(comment => comment.id !== id),
+    );
     try {
       await deleteComment(id);
-      setComments(currentComments =>
-        currentComments.filter(comment => comment.id !== id),
-      );
     } catch {
       setComments(prevComments);
       setCommentsError('Something went wrong!');
@@ -203,7 +201,7 @@ export const App: React.FC = () => {
                   openForm={openForm}
                   setOpenForm={setOpenForm}
                   addCommentHandler={addCommentHandler}
-                  deleteCommentHandler={deleteCommentHandler}
+                  handleDeleteComment={deleteCommentHandler}
                 />
               )}
             </div>

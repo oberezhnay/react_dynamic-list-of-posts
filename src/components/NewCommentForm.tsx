@@ -11,7 +11,7 @@ type Props = {
     name: string,
     email: string,
     body: string,
-  ) => void;
+  ) => Promise<void>;
 };
 
 export const NewCommentForm: React.FC<Props> = ({
@@ -55,12 +55,16 @@ export const NewCommentForm: React.FC<Props> = ({
     }
 
     if (normalizedName && normalizedEmail && normalizedComment) {
-      setCommentError(false);
       try {
-        await addCommentHandler(openedPost.id, normalizedName, normalizedEmail, normalizedComment);
+        await addCommentHandler(
+          openedPost.id,
+          normalizedName,
+          normalizedEmail,
+          normalizedComment,
+        );
         setCommentText('');
-      } catch {
-        setCommentError(true);
+      } catch(e) {
+        console.error('Failed to add comment', e);
       }
     }
   };
@@ -123,7 +127,7 @@ export const NewCommentForm: React.FC<Props> = ({
             className={classNames('input', { 'is-danger': emailError })}
             value={email}
             onChange={e => {
-              setEmail(e.target.value)
+              setEmail(e.target.value);
               if (emailError) {
                 setEmailError(false);
               }
@@ -183,7 +187,9 @@ export const NewCommentForm: React.FC<Props> = ({
         <div className="control">
           <button
             type="submit"
-            className={classNames('button is-link', { 'is-loading': isLoading })}
+            className={classNames('button is-link', {
+              'is-loading': isLoading,
+            })}
           >
             Add
           </button>

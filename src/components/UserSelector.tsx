@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { User } from '../types/User';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 type Props = {
@@ -21,10 +21,12 @@ function useOnClickOutside<T extends HTMLElement>(
       if (!ref.current || ref.current.contains(event.target as Node)) {
         return;
       }
+
       handler();
     };
 
     window.addEventListener('click', listener);
+
     return () => window.removeEventListener('click', listener);
   }, [ref, handler]);
 }
@@ -47,7 +49,8 @@ export const UserSelector: React.FC<Props> = ({
     loadPosts(user.id);
   };
 
-  useOnClickOutside(ref, () => setIsOpen(false));
+  const closeDropdown = useCallback(() => setIsOpen(false), [])
+  useOnClickOutside(ref, closeDropdown);
 
   return (
     <div
@@ -107,9 +110,9 @@ const userShape = PropTypes.shape({
 });
 
 UserSelector.propTypes = {
-  users: PropTypes.arrayOf(userShape).isRequired as React.Validator<User[]>,
+  users: PropTypes.arrayOf(userShape).isRequired,
   loadPosts: PropTypes.func.isRequired,
-  selectedUser: userShape as React.Validator<User | null>,
+  selectedUser: PropTypes.oneOfType([userShape, PropTypes.oneOf([null])]),
   setSelectedUser: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   error: PropTypes.string,

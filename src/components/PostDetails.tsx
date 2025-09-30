@@ -17,7 +17,7 @@ type Props = {
     email: string,
     body: string,
   ) => void;
-  deleteCommentHandler: (id: number) => void;
+  handleDeleteComment: (id: number) => void;
 };
 
 export const PostDetails: React.FC<Props> = ({
@@ -28,10 +28,10 @@ export const PostDetails: React.FC<Props> = ({
   openForm,
   setOpenForm,
   addCommentHandler,
-  deleteCommentHandler,
+  handleDeleteComment,
 }) => {
-  const handleDeleteBtnClick = async (id: number) => {
-    deleteCommentHandler(id);
+  const handleDeleteBtnClick = (id: number) => {
+    handleDeleteComment(id);
   };
 
   return (
@@ -133,7 +133,7 @@ PostDetails.propTypes = {
     body: PropTypes.string.isRequired,
   }).isRequired,
   isLoading: PropTypes.bool.isRequired,
-  errorMessage:  PropTypes.string,
+  errorMessage: PropTypes.string,
   openForm: PropTypes.bool.isRequired,
   setOpenForm: PropTypes.func.isRequired,
   addCommentHandler: PropTypes.func.isRequired,
